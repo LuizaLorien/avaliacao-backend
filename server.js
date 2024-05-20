@@ -23,16 +23,19 @@ const server = http.createServer((request, response) => {
             response.writeHead(200, { "Content-Type": "application/json" });
             response.end(JSON.stringify(jsonData));
 
-        } else if (method === "GET" && url.startsWith === "/pessoas/") {//id
-            const idpessoa = jsonData.length +1
-            if (idpessoa === 0) {
-                response.writeHead(400, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify({ message: "Não foi encontrado participantes registrados" }))
-              } else {
-                response.setHeader('Content-Type', 'application/json')
-                response.end(JSON.stringify({ message: `Existem ${idpessoa} participantes cadastrados!`, value: `${lengthPart}` }))
-              }
+        } else if (method === "GET" && url.startsWith('/pessoas/')) {//id
+            
+            const usuarioId =  url.split('/')[2]
+            const findPessoa = jsonData.find(usuario => usuario.id == usuarioId)
 
+            if(findPessoa.length == 0){
+              response.writeHead(404, {"Content-Type": "application/json"})
+              response.end(JSON.stringify({message: "Usuario não encontrado."}))
+            }else{
+              response.setHeader('Content-Type', 'application/json')
+              response.end(JSON.stringify(findPessoa))
+              return
+            }
         }else if (method === "POST" && url === "/pessoas") {
 
             let body = ""
@@ -65,26 +68,25 @@ const server = http.createServer((request, response) => {
 
             })
         } else if (method === "DELETE" && url.startsWith === "/pessoas/") {
+
             const id = parseInt(url.split("/")[2]);
             const usuario = jsonData.findUsuario((item) => item.id === id);
+
             if (usuario !== -1) {
                 jsonData.splice(usuario, 1);
+
                 fs.writeFile(
-                  "pessoas.json",
-                  JSON.stringify(jsonData, null, 2), (err) => {
+                  "pessoas.json", JSON.stringify(jsonData, null, 2), (err) => {
                     if (err) {
                       response.writeHead(500, { "Content-Type": "application/json" });
-                      response.end(
-                        JSON.stringify({ message: "Erro interno do servidor" })
-                      );
+                      response.end(JSON.stringify({ message: "Erro interno do servidor" }));
                       return;
                     }
                     response.writeHead(200, { "Content-Type": "application/json" });
-                    response.end(
-                      JSON.stringify({ message: "Usuário removido com sucesso" })
-                    );
+                    response.end(JSON.stringify({ message: "Usuário removido com sucesso" }));
                   }
                 );
+
               } else {
                 response.writeHead(404, { "Content-Type": "application/json" });
                 response.end(JSON.stringify({ message: "Usuário não encontrado" }));
